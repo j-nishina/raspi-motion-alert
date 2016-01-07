@@ -65,14 +65,11 @@ class PinState
   def update_pin_state(state)
     if state != @state then
       if state == 1 then
-        puts("positive")
         @positive_trigger = true
       else
-        puts("negative")
         @negative_trigger  = true
       end
       @state = state
-      puts("new pin state #{@state}")
     end
   end
 
