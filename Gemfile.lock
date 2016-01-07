@@ -1,0 +1,15 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    eventmachine (1.0.8)
+    i2c (0.4.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  eventmachine
+  i2c
+
+BUNDLED WITH
+   1.11.2
