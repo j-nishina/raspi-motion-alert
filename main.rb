@@ -1,8 +1,16 @@
 require 'logger'
 require 'eventmachine'
+require 'aws-sdk'
 
+# Logger初期化
 logger = Logger.new(STDOUT)
 
+# AWSクライアントセットアップ
+s3 = Aws::S3::Client.new
+
+logger.debug(s3.list_buckets)
+
+# 最新の画像取得
 def get_latest_image()
   file_path = Dir.glob("/tmp/motion/*.jpg").max_by {|f| File.mtime(f)}
 end
