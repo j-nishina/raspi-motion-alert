@@ -17,14 +17,18 @@ end
 
 # S3へのファイルアップロード
 def upload_file_to_aws(file_path)
-  file = File.open(file_path)
-  file_name = File.basename(file_path)
-  
-  @s3.put_object(
-    bucket: "biz-hackathon",
-    body: file,
-    key: file_name
-  )
+  begin
+    file = File.open(file_path)
+    file_name = File.basename(file_path)
+    
+    @s3.put_object(
+      bucket: "biz-hackathon",
+      body: file,
+      key: file_name
+    )
+  rescue
+    logger.error("upload failed")
+  end
 end
 
 # pinの値を取得して返す。
