@@ -88,19 +88,23 @@ pin_state = PinState.new()
 EM.run do
   # 定期的にタスクを実行する
   EM::PeriodicTimer.new(5) do
-    file_path = get_latest_image_path()
-    @logger.info("file_path: #{file_path}")
-    
-    pin_value = get_pin_value()
-    pin_state.update_pin_state(pin_value)
-    @logger.debug("pin value: #{pin_value}")
-    @logger.debug("pin state: #{pin_state.positive_trigger}")
+    begin
+      file_path = get_latest_image_path()
+      @logger.info("file_path: #{file_path}")
+      
+      pin_value = get_pin_value()
+      pin_state.update_pin_state(pin_value)
+      @logger.debug("pin value: #{pin_value}")
+      @logger.debug("pin state: #{pin_state.positive_trigger}")
 
-    if pin_state.positive_trigger then
-      upload_file_to_aws(file_path)
-      call_alert_api(file_path)
-      @logger.info("finished file upload")
-      pin_state.reset()
+      if pin_state.positive_trigger then
+        upload_file_to_aws(file_path)
+        call_alert_api(file_path)
+        @logger.info("finished file upload")
+        pin_state.reset()
+      end
+    rescue
+      @logger.error("failed to detect")
     end
   end
 end
