@@ -1,14 +1,15 @@
 require 'logger'
 require 'eventmachine'
 require 'aws-sdk'
+require 'open-uri'
 
 # Logger初期化
-logger = Logger.new(STDOUT)
+@logger = Logger.new(STDOUT)
 
 # AWSクライアントセットアップ
 @s3 = Aws::S3::Client.new
 
-logger.debug(@s3.list_buckets)
+@logger.debug(@s3.list_buckets)
 
 # 最新の画像取得
 def get_latest_image_path()
@@ -27,7 +28,7 @@ def upload_file_to_aws(file_path)
       key: file_name
     )
   rescue
-    logger.error("upload failed")
+    @logger.error("upload failed")
   end
 end
 
@@ -37,6 +38,14 @@ def get_pin_value()
   value = pin.read()[0].to_i
   pin.close
   value
+end
+
+def call_alert_api(file_path)
+  file_name = File.basename(file_path)
+  url = "https://qntg1nh5pj.execute-api.ap-northeast-1.amazonaws.com/prod/pythonFunction4/#{file_name}"
+  @logger.info(url)
+  res = open(url)
+  @logger.info(res)
 end
 
 # ピンの立ち上がり立ち下がりのトリガー管理
@@ -80,16 +89,17 @@ EM.run do
   # 定期的にタスクを実行する
   EM::PeriodicTimer.new(5) do
     file_path = get_latest_image_path()
-    logger.info("file_path: #{file_path}")
+    @logger.info("file_path: #{file_path}")
     
     pin_value = get_pin_value()
     pin_state.update_pin_state(pin_value)
-    logger.debug("pin value: #{pin_value}")
-    logger.debug("pin state: #{pin_state.positive_trigger}")
+    @logger.debug("pin value: #{pin_value}")
+    @logger.debug("pin state: #{pin_state.positive_trigger}")
 
     if pin_state.positive_trigger then
       upload_file_to_aws(file_path)
-      logger.info("finished file upload")
+      call_alert_api(file_path)
+      @logger.info("finished file upload")
       pin_state.reset()
     end
   end
