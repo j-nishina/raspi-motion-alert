@@ -39,6 +39,42 @@ def get_pin_value()
   value
 end
 
+# ピンの立ち上がり立ち下がりのトリガー管理
+class PinState
+  attr :state
+  attr :positive_trigger
+  attr :negative_trigger
+  
+  def initialize()
+    @state == false
+    @positive_trigger = false
+    @negative_trigger  = false
+  end
+
+  # pinの状態更新
+  # stateが変わるとその方向のtriggerをtrueにする
+  def update_pin_state(state)
+    if state != @state then
+      if state == 1 then
+        puts("positive")
+        @positive_trigger = true
+      else
+        puts("negative")
+        @negative_trigger  = true
+      end
+      @state = state
+      puts("new pin state #{@state}")
+    end
+  end
+
+  def reset()
+    @positive_trigger = false
+    @negative_trigger  = false
+  end
+end
+
+pin_state = PinState.new()
+
 # タスクの定期実行用
 EM.run do
   # 定期的にタスクを実行する
@@ -47,10 +83,14 @@ EM.run do
     logger.info("file_path: #{file_path}")
     
     pin_value = get_pin_value()
+    pin_state.update_pin_state(pin_value)
     logger.debug("pin value: #{pin_value}")
-    if pin_value == 1 then
+    logger.debug("pin state: #{pin_state.positive_trigger}")
+
+    if pin_state.positive_trigger then
       upload_file_to_aws(file_path)
       logger.info("finished file upload")
+      pin_state.reset()
     end
   end
 end
