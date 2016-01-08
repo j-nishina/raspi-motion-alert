@@ -82,6 +82,18 @@ end
 
 pin_state = PinState.new()
 
+# 雑Lチカ用(gpio17)
+def toggle_led_pin()
+  begin
+    pin = File.open("/sys/class/gpio/gpio17/value", "r+") do |pin|
+      val = pin.read().to_i()
+      next_val = (val == 1) ? "0" : "1"
+      pin.write(next_val)
+    end
+  rescue
+  end
+end
+
 # タスクの定期実行用
 EM.run do
   # 定期的にタスクを実行する
@@ -100,6 +112,10 @@ EM.run do
         call_alert_api(file_path)
         @logger.info("finished file upload")
         pin_state.reset()
+        100.times do
+          toggle_led_pin()
+          sleep(0.05)
+        end
       end
     rescue
       @logger.error("failed to detect")
