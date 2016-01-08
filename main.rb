@@ -42,7 +42,8 @@ end
 
 def call_alert_api(file_path)
   file_name = File.basename(file_path)
-  url = "https://qntg1nh5pj.execute-api.ap-northeast-1.amazonaws.com/prod/pythonFunction4/#{file_name}"
+  # url = "https://qntg1nh5pj.execute-api.ap-northeast-1.amazonaws.com/prod/pythonFunction4/#{file_name}"
+  url = "https://qntg1nh5pj.execute-api.ap-northeast-1.amazonaws.com/prod/call/#{file_name}"
   @logger.info(url)
   res = open(url)
   @logger.info(res)
